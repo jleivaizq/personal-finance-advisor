@@ -1,6 +1,6 @@
 export default {  
-    entities: ['./dist/entities/**/*.js'], 
-    entitiesTs: ['./src/entities/**/*.ts'], 
+    entities: ['./dist/**/*.entity.js'], 
+    entitiesTs: ['./src/**/*.entity.ts'], 
     dbName: 'pfa',  
     type: 'postgresql'
 };

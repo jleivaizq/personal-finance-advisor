@@ -3,7 +3,8 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { User } from './user.entity';
+import { IUserRO } from './user.interface';
 
 @Injectable()
 export class UserService {
@@ -13,11 +14,12 @@ export class UserService {
     private readonly userRepository: EntityRepository<User>
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    const { email } = createUserDto;
-    const user  = new User(email);
+  async create(createUserDto: CreateUserDto) : Promise<IUserRO> {
+
+    const { username, password, email } = createUserDto;
+    const user  = new User(username, password, email);
     this.userRepository.persistAndFlush(user);
-    return `This action created a new user with ${ user.email }`;
+    return this.buildUserRO(user);
   }
 
   findAll() {
@@ -34,5 +36,14 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+
+  private buildUserRO(user: User) {
+    const userRO = {
+      username: user.username,
+      email: user.email
+    }
+    return { user: userRO }
   }
 }

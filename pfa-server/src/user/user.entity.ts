@@ -8,7 +8,7 @@ export class User {
     @PrimaryKey()
     uuid: string = v4();
 
-    @Property( { hidden: true })
+    @Property()
     @IsEmail()
     email!: string;
 

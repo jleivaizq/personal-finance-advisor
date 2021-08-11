@@ -1,10 +1,10 @@
+import { wrap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './user.entity';
-import { IUserRO } from './user.interface';
 
 @Injectable()
 export class UserService {
@@ -14,36 +14,37 @@ export class UserService {
     private readonly userRepository: EntityRepository<User>
   ) {}
 
-  async create(createUserDto: CreateUserDto) : Promise<IUserRO> {
-
+  async create(createUserDto: CreateUserDto) {
     const { username, password, email } = createUserDto;
     const user  = new User(username, password, email);
     this.userRepository.persistAndFlush(user);
-    return this.buildUserRO(user);
+    return user;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return this.userRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    return await this.findById(id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.findById(id);
+    wrap(user).assign(updateUserDto);
+    await this.userRepository.flush(); 
+    return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    await this.userRepository.removeAndFlush(await this.findById(id));
   }
 
-
-  private buildUserRO(user: User) {
-    const userRO = {
-      username: user.username,
-      email: user.email
+  private async findById(id: string) {
+    const user = await this.userRepository.findOne(id);
+    if (user == null) {
+      throw new NotFoundException('User not found');
     }
-    return { user: userRO }
+    return user;
   }
 }

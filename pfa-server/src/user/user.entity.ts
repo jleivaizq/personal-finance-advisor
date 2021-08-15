@@ -1,6 +1,7 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { IsEmail } from "class-validator";
 import { v4 } from 'uuid';
+import { UserFixture } from "./user.fixtures";
 
 @Entity()
 export class User {
